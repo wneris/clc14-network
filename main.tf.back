@@ -1,0 +1,121 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "6.20.0"
+    }
+  }
+}
+
+provider "aws" {
+  # Configuration options
+}
+
+resource "aws_vpc" "minha-vpc" {
+  cidr_block       = "10.0.0.0/16"
+
+  tags = {
+    Name = "vpc-terraform"
+  }
+}
+
+
+
+## Cria subnet publica na AZ A
+resource "aws_subnet" "public_subnet_1a" {
+  vpc_id     = aws_vpc.minha-vpc.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+
+  tags = {
+    Name = "public_subnet_1a"
+  }
+}
+
+## Cria subnet privada na AZ A
+resource "aws_subnet" "private_subnet_1a" {
+  vpc_id     = aws_vpc.minha-vpc.id
+  cidr_block = "10.0.10.0/24"
+  availability_zone = "us-east-1a"
+
+  tags = {
+    Name = "private_subnet_1a"
+  }
+}
+
+
+## Cria subnet publica na AZ B
+resource "aws_subnet" "public_subnet_1b" {
+  vpc_id     = aws_vpc.minha-vpc.id
+  cidr_block = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
+
+  tags = {
+    Name = "public_subnet_1b"
+  }
+}
+
+## Cria subnet privada na AZ B
+resource "aws_subnet" "private_subnet_1b" {
+  vpc_id     = aws_vpc.minha-vpc.id
+  cidr_block = "10.0.20.0/24"
+  availability_zone = "us-east-1b"
+  tags = {
+    Name = "private_subnet_1b"
+  }
+}
+
+## Cria intenet gateway
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.minha-vpc.id
+
+  tags = {
+    Name = "igw-vpc-terraform"
+  }
+}
+
+## Cria tabela de rotas publica
+
+resource "aws_route_table" "public-rt" {
+  vpc_id = aws_vpc.minha-vpc.id
+
+  # since this is exactly the route AWS will create, the route will be adopted
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+    tags = {
+      Name = "public-rt-terraform"
+  }
+}
+
+## OUTPUTS
+
+output "vpc_id" {
+    value = aws_vpc.minha-vpc.id
+}
+
+output "subnet_publica_1a" {
+    value = aws_subnet.public_subnet_1a.id
+}
+
+output "subnet_publica_1b" {
+    value = aws_subnet.public_subnet_1b.id
+}
+
+output "subnet_privada_1a" {
+    value = aws_subnet.private_subnet_1a.id
+}
+
+output "subnet_privada_1b" {
+    value = aws_subnet.private_subnet_1b.id
+}
+
+output "internet_gateway" {
+    value = aws_internet_gateway.igw.id
+}
+
+output "public-route" {
+    value = aws_route_table.public-rt.id
+}
