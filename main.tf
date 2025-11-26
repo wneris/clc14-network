@@ -1,6 +1,6 @@
 variable "vpc_name" {
   type    = string
-  default = "vpc-terraform"
+  default = "vpc-terraform-v1"
 }
 
 resource "aws_vpc" "minha_vpc" {
